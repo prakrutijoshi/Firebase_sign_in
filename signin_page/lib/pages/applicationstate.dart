@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,10 +19,30 @@ class ApplicationState extends ChangeNotifier{
             if(user != null)
             {
               _loginState = ApplicationLoginState.loggedIn;
+              _entryDataSubscription = FirebaseFirestore.instance
+                  .collection('Entries')
+                  .orderBy('timestamp', descending: true)
+                  //.limit(3)
+                  .snapshots()
+                  .listen((snapshot) {
+                    _entryDatas = [];
+                    for( final document in snapshot.docs) {
+                        _entryDatas.add(
+                          EntryData(
+                              dataname: document.data()['name'] as String,
+                              dataentry: document.data()['entry'] as String,
+                              datatime: document.data()['timeLog'] as String,
+                          ),
+                        );
+                    }
+                    notifyListeners();
+              });
             }
             else
             {
               _loginState = ApplicationLoginState.loggedOut;
+              _entryDatas = [];
+              _entryDataSubscription?.cancel();
             }
             notifyListeners();
           });
@@ -33,18 +54,11 @@ class ApplicationState extends ChangeNotifier{
         String? _email;
         String? get email => _email;
 
-        Future<DocumentReference> addToEntries (String addentry, String timelog){
-          if( _loginState != ApplicationLoginState.loggedIn ) {
-            throw Exception("Please Login");
-          }
-          return FirebaseFirestore.instance.collection('Entries').add({
-              'entry' : addentry,
-              'timeLog' : timelog,
-              'timestamp' : DateTime.now().millisecondsSinceEpoch,
-              'name' : FirebaseAuth.instance.currentUser!.displayName,
-              'userId' : FirebaseAuth.instance.currentUser!.uid,
-          });
-        }
+        StreamSubscription<QuerySnapshot>? _entryDataSubscription;
+        List<EntryData> _entryDatas=[];
+        List<EntryData> get entryDatas => _entryDatas;
+
+
 
         void startLoginFlow() {
           _loginState = ApplicationLoginState.emailAddress;
@@ -124,6 +138,19 @@ class ApplicationState extends ChangeNotifier{
         void signOut()
         {
           FirebaseAuth.instance.signOut();
+        }
+
+        Future<DocumentReference> addToEntries (String addentry, String timelog){
+          if( _loginState != ApplicationLoginState.loggedIn ) {
+            throw Exception("Please Login");
+          }
+          return FirebaseFirestore.instance.collection('Entries').add({
+            'entry' : addentry,
+            'timeLog' : timelog,
+            'timestamp' : DateTime.now().millisecondsSinceEpoch,
+            'name' : FirebaseAuth.instance.currentUser!.displayName,
+            'userId' : FirebaseAuth.instance.currentUser!.uid,
+          });
         }
 
 }

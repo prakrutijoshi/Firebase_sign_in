@@ -59,6 +59,7 @@ class HomePage extends StatelessWidget {
                   Entries(
                       logEntry: (String entry, String time)
                         => appState.addToEntries(entry, time),
+                    entries: appState.entryDatas,
                   ),
                 ]
               ],

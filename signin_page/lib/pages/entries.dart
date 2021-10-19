@@ -1,12 +1,22 @@
 import 'dart:async';
 import 'package:signin_page/widgets/header.dart';
+import 'package:signin_page/widgets/paragraph.dart';
 import 'package:signin_page/widgets/stylebutton.dart';
 import 'package:flutter/material.dart';
 
+class EntryData {
+  EntryData({ required this. dataname, required this.dataentry, required this.datatime});
+
+  final String dataname;
+  final String dataentry;
+  final String datatime;
+}
+
 class Entries extends StatefulWidget {
-  const Entries({required this.logEntry});
+  const Entries({required this.logEntry, required this.entries});
 
   final Future<void> Function(String entry, String time) logEntry;
+  final List<EntryData> entries;
 
   @override
   _EntriesState createState() => _EntriesState();
@@ -21,6 +31,7 @@ class _EntriesState extends State<Entries> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Header('Daily Log'),
         Padding(
@@ -95,6 +106,15 @@ class _EntriesState extends State<Entries> {
             ),
           ),
         ),
+        const SizedBox(height:8),
+          for (var dataentry in widget.entries)
+            Row(
+              children: [
+                Paragraph( "${dataentry.dataname} : " , Colors.deepPurple),
+                Paragraph(" ${dataentry.dataentry} for ${dataentry.datatime}", Colors.grey)
+              ],
+            ),
+        const SizedBox(height: 8),
       ],
     );
   }

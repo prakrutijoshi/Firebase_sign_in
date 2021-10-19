@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:signin_page/widgets/stylebutton.dart';
 import 'package:signin_page/widgets/emailform.dart';
@@ -132,14 +133,15 @@ class Authentication extends StatelessWidget {
         return Column(
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 30, top: 8),
+              padding: const EdgeInsets.only(left: 20, top: 8),
               child: Row(
                 children: [
-                  const Text("Hello User", style: TextStyle(fontSize: 20,
+                   Text("Hello ${FirebaseAuth.instance.currentUser!.displayName}",
+                    style: const TextStyle(fontSize: 20,
                       fontStyle: FontStyle.italic,
                       fontWeight: FontWeight.bold,
                       color: Colors.deepPurpleAccent),),
-                  const SizedBox(width: 140),
+                  const SizedBox(width: 100),
                   styledButton(
                     onPressed: () {
                       signOut();
